@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archer Myth Buster: Ultimate Edition</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            width: 400px;
+            height: 600px;
+            border: 5px solid #fff;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            display: none; 
+        }
+
+        .active { display: block; }
+
+        /* --- MAIN MENU --- */
+        #main-menu {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            text-align: center;
+            padding-top: 40px;
+        }
+        
+        .menu-btn {
+            display: block;
+            width: 80%;
+            margin: 12px auto;
+            padding: 12px;
+            font-size: 18px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid white;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .menu-btn:hover { background: white; color: #1e3c72; transform: scale(1.05); }
+
+        /* --- GAME BOARD --- */
+        #game-board {
+            background: linear-gradient(to bottom, #87CEEB 60%, #a2d149 60%);
+        }
+
+        #score-board {
+            position: absolute; top: 10px; right: 15px;
+            color: #333; font-size: 20px; font-weight: bold; z-index: 5;
+        }
+        
+        #combo-display {
+            position: absolute; top: 40px; right: 15px;
+            color: #ff6b35; font-size: 16px; font-weight: bold; z-index: 5;
+            display: none;
+            animation: pulse 0.5s ease;
+        }
+        
+        #high-score {
+            position: absolute; top: 10px; left: 15px;
+            color: #666; font-size: 14px; font-weight: bold; z-index: 5;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        #category-label {
+            position: absolute; top: 10px; left: 15px;
+            color: #555; font-size: 14px; font-weight: bold; text-transform: uppercase;
+        }
+
+        #category-label {
+            position: absolute; top: 40px; left: 15px;
+            color: #555; font-size: 14px; font-weight: bold; text-transform: uppercase;
+        }
+
+        /* --- THE BALLOON --- */
+        .balloon {
+            width: 70px; height: 85px;
+            background-color: #ff4d4d;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            position: absolute;
+            top: 50px; left: 165px;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+            z-index: 2;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        .balloon::after {
+            content: ""; position: absolute;
+            bottom: -15px; left: 50%; transform: translateX(-50%);
+            width: 2px; height: 15px; background-color: #555;
+        }
+
+        /* --- THE ARCHER --- */
+        #archer-container {
+            position: absolute; bottom: 10px; left: 165px;
+            font-size: 50px; z-index: 3;
+            transition: left 0.1s ease;
+            display: flex;
+            align-items: center;
+        }
+        .bow {
+            font-size: 45px;
+            margin-left: -8px;
+        }
+        .archer {
+            font-size: 40px;
+        }
+
+        /* --- THE ARROW --- */
+        #arrow {
+            position: absolute; left: 185px; bottom: 60px;
+            width: 4px; height: 40px; background-color: #8B4513;
+            display: none; z-index: 1;
+            transition: left 0.05s ease;
+        }
+        #arrow::before {
+            content: ''; position: absolute; top: -10px; left: -3px;
+            border-left: 5px solid transparent; border-right: 5px solid transparent;
+            border-bottom: 10px solid #555;
+        }
+        #arrow::after {
+            content: ''; position: absolute; bottom: 0; left: -3px;
+            width: 10px; height: 10px; background-color: white;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+        }
+
+        /* --- MODAL --- */
+        #modal-overlay {
+            display: none;
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 10;
+            align-items: center; justify-content: center;
+        }
+
+        #modal-content {
+            background-color: white; color: #333;
+            padding: 30px; border-radius: 10px;
+            text-align: center; width: 80%;
+            border: 4px solid #fff;
+            animation: popIn 0.3s ease;
+        }
+
+        .myth-mode #modal-content {
+            background-color: #222;
+            color: #fff;
+            border-color: #ff4d4d;
+        }
+
+        .action-btn {
+            background-color: #e67e22; color: white;
+            border: none; padding: 10px 20px;
+            border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px;
+        }
+        .home-btn { background-color: #6c757d; }
+        
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        /* --- PARTICLE EFFECTS --- */
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        @keyframes explode {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* --- CLOUDS --- */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 100px;
+            opacity: 0.7;
+            animation: drift linear infinite;
+        }
+        
+        @keyframes drift {
+            from { left: -100px; }
+            to { left: 420px; }
+        }
+        
+        /* --- ARROW TRAIL --- */
+        .arrow-trail {
+            position: absolute;
+            width: 4px;
+            height: 10px;
+            background: rgba(139, 69, 19, 0.3);
+            z-index: 0;
+            animation: fadeTrail 0.3s ease-out forwards;
+        }
+        
+        @keyframes fadeTrail {
+            to { opacity: 0; transform: scaleY(0.5); }
+        }
+
+        h1 { color: white; text-shadow: 2px 2px #333; margin-bottom: 20px;}
+        .instructions { margin-top: 15px; font-size: 14px; color: #aaa; }
+
+    </style>
+</head>
+<body>
+
+    <div id="main-menu" class="screen active">
+        <h1>🏹 Knowledge Hunter</h1>
+        <p>Choose your target:</p>
+        <button class="menu-btn" onclick="startGame('space')">🪐 Space</button>
+        <button class="menu-btn" onclick="startGame('animals')">🦁 Animals</button>
+        <button class="menu-btn" onclick="startGame('history')">📜 History</button>
+        <button class="menu-btn" onclick="startGame('coding')">💻 Coding</button>
+    </div>
+
+    <div id="game-board" class="screen">
+        <div id="category-label">Topic: <span id="current-topic"></span></div>
+        <div id="high-score">🏆 Best: <span id="high-score-val">0</span></div>
+        <div id="score-board">Score: <span id="score-val">0</span></div>
+        <div id="combo-display">🔥 <span id="combo-val">0</span>x COMBO!</div>
+        
+        <div id="balloon" class="balloon"></div>
+        <div id="archer-container">
+            <span class="archer">🧝</span><span class="bow">🏹</span>
+        </div>
+        <div id="arrow"></div>
+
+        <div id="modal-overlay">
+            <div id="modal-content">
+                <h3 id="modal-title" style="margin-top:0;">DIRECT HIT!</h3>
+                <div id="fact-text" style="font-size: 18px; line-height: 1.5;">Fact goes here...</div>
+                <br>
+                <button class="action-btn" onclick="nextLevel()">Next Arrow</button>
+                <button class="action-btn home-btn" onclick="goHome()">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions">🎮 Move: <strong>← →</strong> or <strong>A D</strong> | Shoot: <strong>SPACEBAR</strong> or <strong>TAP</strong></div>
+
+    <script>
+        // --- 1. EXPANDED DATABASE ---
+        
+        const factsDB = {
+            space: [
+                "A day on Venus is longer than a year on Venus.",
+                "Space is completely silent.",
+                "Neutron stars can spin 600 times per second.",
+                "One million Earths could fit inside the Sun.",
+                "The sunset on Mars appears blue.",
+                "There is a planet made of diamonds (55 Cancri e).",
+                "The footprints on the Moon will be there for 100 million years.",
+                "Saturn could float in water because it is less dense than water.",
+                "99% of the solar system's mass is the Sun.",
+                "If two pieces of same metal touch in space, they bond permanently."
+            ],
+            animals: [
+                "Octopuses have three hearts.",
+                "Butterflies taste with their feet.",
+                "A group of flamingos is called a 'flamboyance'.",
+                "Sloths can hold their breath longer than dolphins (40 mins).",
+                "A snail can sleep for three years.",
+                "Elephants are the only animal that can't jump.",
+                "A shrimp's heart is in its head.",
+                "Cows have best friends and get stressed when separated.",
+                "Polar bear skin is actually black, their fur is transparent.",
+                "Hummingbirds are the only birds that can fly backwards."
+            ],
+            history: [
+                "The shortest war in history lasted 38 minutes.",
+                "Ancient Romans used urine to whiten their teeth.",
+                "Ketchup was sold in the 1830s as medicine.",
+                "Napoleon was once attacked by a horde of bunnies.",
+                "Oxford University is older than the Aztec Empire.",
+                "Woolly mammoths were still alive when the Pyramids were built.",
+                "The Eiffel Tower was originally intended for Barcelona.",
+                "Cleopatra lived closer to the moon landing than the Great Pyramid construction.",
+                "Turkeys were once worshipped like gods by the Mayan people.",
+                "There were female gladiators in Ancient Rome."
+            ],
+            coding: [
+                "The first computer bug was an actual moth stuck in a relay.",
+                "The first computer mouse was made of wood.",
+                "Wi-Fi doesn't stand for 'Wireless Fidelity'. It stands for nothing.",
+                "There are over 700 programming languages.",
+                "The first programmer in history was a woman, Ada Lovelace.",
+                "Python is named after the comedy group Monty Python.",
+                "The first computer was 2.5 meters high and weighed 30,000kg.",
+                "A 1956 hard drive with 5MB of storage weighed a ton.",
+                "CAPTCHA stands for 'Completely Automated Public Turing test to tell Computers and Humans Apart'.",
+                "QWERTY keyboards were designed to slow down typing so typewriters wouldn't jam."
+            ]
+        };
+
+        // NEW: Common Myths (False beliefs)
+        const mythsDB = [
+            "MYTH: Bulls hate the color red.\nTRUTH: Bulls are colorblind. They react to the movement of the cape.",
+            "MYTH: We only use 10% of our brains.\nTRUTH: We use virtually every part of the brain.",
+            "MYTH: Goldfish have a 3-second memory.\nTRUTH: Goldfish can remember things for months!",
+            "MYTH: The Great Wall of China is visible from space.\nTRUTH: It is not visible to the naked eye from orbit.",
+            "MYTH: Bats are blind.\nTRUTH: Bats can actually see quite well, some better than humans.",
+            "MYTH: Napoleon was short.\nTRUTH: He was average height for a Frenchman of his time.",
+            "MYTH: Sugar makes kids hyper.\nTRUTH: Studies show no link between sugar and hyperactivity.",
+            "MYTH: Lightning never strikes the same place twice.\nTRUTH: It often does. The Empire State Building gets hit 25 times a year.",
+            "MYTH: Shaving makes hair grow back thicker.\nTRUTH: It just gives the hair a blunt tip, making it feel coarser.",
+            "MYTH: Cracking knuckles causes arthritis.\nTRUTH: It's just gas bubbles bursting. One doctor did it for 60 years on one hand and was fine.",
+            "MYTH: Eating carrots improves night vision.\nTRUTH: This was WWII propaganda to hide the invention of radar technology!",
+            "MYTH: Ostriches bury their heads in sand.\nTRUTH: They don't. They lay their heads flat on the ground to hide."
+        ];
+
+        // --- CONFIG ---
+        const boardHeight = 600;
+        const arrowSpeed = 15;
+        let balloonSpeed = 3;
+
+        // --- DOM ELEMENTS ---
+        const menuScreen = document.getElementById('main-menu');
+        const gameScreen = document.getElementById('game-board');
+        const balloon = document.getElementById('balloon');
+        const arrow = document.getElementById('arrow');
+        const modal = document.getElementById('modal-overlay');
+        const modalContent = document.getElementById('modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const factText = document.getElementById('fact-text');
+        const scoreSpan = document.getElementById('score-val');
+        const topicLabel = document.getElementById('current-topic');
+        const comboDisplay = document.getElementById('combo-display');
+        const comboVal = document.getElementById('combo-val');
+        const highScoreSpan = document.getElementById('high-score-val');
+
+        // --- VARIABLES ---
+        let gameRunning = false;
+        let isShooting = false;
+        let currentCategory = 'space';
+        let balloonX = 165;
+        let balloonDir = 1;
+        let arrowY = 60; 
+        let score = 0;
+        let animationId;
+        
+        let isMythBalloon = false;
+        
+        // Archer movement
+        let archerX = 165;
+        const archerSpeed = 8;
+        const archerContainer = document.getElementById('archer-container');
+        let keys = {};
+        
+        // Combo & High Score
+        let combo = 0;
+        let highScore = localStorage.getItem('archerHighScore') || 0;
+        highScoreSpan.innerText = highScore;
+        
+        // Arrow trail
+        let trailInterval; 
+
+        // --- MENU FUNCTIONS ---
+        function startGame(category) {
+            currentCategory = category;
+            topicLabel.innerText = category.toUpperCase();
+            menuScreen.classList.remove('active');
+            gameScreen.classList.add('active');
+            score = 0;
+            combo = 0;
+            scoreSpan.innerText = "0";
+            updateComboDisplay();
+            balloonSpeed = 3;
+            archerX = 165;
+            archerContainer.style.left = archerX + 'px';
+            keys = {};
+            
+            // Clear old clouds
+            document.querySelectorAll('.cloud').forEach(c => c.remove());
+            createClouds();
+            
+            gameRunning = true;
+            resetArrow();
+            spawnBalloon(); 
+            loop();
+        }
+
+        function goHome() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            modal.style.display = 'none';
+            
+            // Clean up effects
+            document.querySelectorAll('.particle, .arrow-trail, .cloud').forEach(el => el.remove());
+            
+            gameScreen.classList.remove('active');
+            menuScreen.classList.add('active');
+        }
+
+        // --- GAME LOOP ---
+        function loop() {
+            if (!gameRunning) return;
+
+            // 1. Move Archer
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+                archerX -= archerSpeed;
+            }
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+                archerX += archerSpeed;
+            }
+            
+            // Keep archer in bounds
+            if (archerX < 0) archerX = 0;
+            if (archerX > 350) archerX = 350;
+            
+            archerContainer.style.left = archerX + 'px';
+
+            // 2. Move Balloon (Fast if Myth)
+            let currentSpeed = isMythBalloon ? (balloonSpeed * 1.5) : balloonSpeed;
+            
+            balloonX += currentSpeed * balloonDir;
+            
+            if (balloonX >= 330 || balloonX <= 0) {
+                balloonDir *= -1;
+            }
+            balloon.style.left = balloonX + 'px';
+
+            // 3. Move Arrow
+            if (isShooting) {
+                arrowY += arrowSpeed;
+                arrow.style.bottom = arrowY + 'px';
+                
+                // Create trail effect
+                createArrowTrail();
+
+                if (checkCollision(arrow, balloon)) {
+                    pop();
+                }
+                
+                if (arrowY > boardHeight) {
+                    resetArrow();
+                    combo = 0;
+                    updateComboDisplay();
+                }
+            }
+
+            animationId = requestAnimationFrame(loop);
+        }
+
+        // --- ACTIONS ---
+        function shoot() {
+            if (!isShooting && gameRunning) {
+                isShooting = true;
+                // Position arrow at archer's current position
+                arrow.style.left = (archerX + 20) + 'px';
+                arrow.style.display = 'block'; 
+            }
+        }
+
+        function checkCollision(el1, el2) {
+            const r1 = el1.getBoundingClientRect();
+            const r2 = el2.getBoundingClientRect();
+            return !(r1.right < r2.left + 10 || 
+                     r1.left > r2.right - 10 || 
+                     r1.bottom < r2.top + 20 || 
+                     r1.top > r2.bottom - 20);
+        }
+
+        function pop() {
+            gameRunning = false;
+            
+            // Create explosion particles
+            createExplosion(balloon.offsetLeft + 35, balloon.offsetTop + 42, balloon.style.backgroundColor);
+            
+            balloon.style.display = 'none'; 
+            arrow.style.display = 'none';   
+            
+            score++;
+            combo++;
+            scoreSpan.innerText = score;
+            
+            // Update combo display
+            updateComboDisplay();
+            
+            // Update high score
+            if (score > highScore) {
+                highScore = score;
+                highScoreSpan.innerText = highScore;
+                localStorage.setItem('archerHighScore', highScore);
+            }
+
+            // --- MYTH OR FACT? ---
+            if (isMythBalloon) {
+                const randomMyth = mythsDB[Math.floor(Math.random() * mythsDB.length)];
+                
+                modal.classList.add('myth-mode');
+                modalTitle.innerText = "MYTH BUSTED!";
+                modalTitle.style.color = "#ff4d4d"; 
+                factText.innerText = randomMyth;
+            } else {
+                const categoryFacts = factsDB[currentCategory];
+                const randomFact = categoryFacts[Math.floor(Math.random() * categoryFacts.length)];
+                
+                modal.classList.remove('myth-mode');
+                modalTitle.innerText = "DID YOU KNOW?";
+                modalTitle.style.color = "#2c3e50";
+                factText.innerText = randomFact;
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function nextLevel() {
+            modal.style.display = 'none';
+            resetArrow();
+            spawnBalloon(); 
+            
+            if (!isMythBalloon) {
+                balloonSpeed += 0.2; 
+            }
+            
+            gameRunning = true;
+            loop();
+        }
+
+        function spawnBalloon() {
+            // 20% chance for Myth Balloon
+            const randomChance = Math.random();
+
+            if (randomChance < 0.20) {
+                isMythBalloon = true;
+                balloon.style.backgroundColor = "#000000"; 
+                balloon.style.boxShadow = "0 0 15px #ffffff"; 
+            } else {
+                isMythBalloon = false;
+                const colors = ['#ff4d4d', '#ff9f43', '#1dd1a1', '#54a0ff', '#5f27cd'];
+                balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                balloon.style.boxShadow = "inset -5px -5px 10px rgba(0,0,0,0.1)"; 
+            }
+            
+            balloon.style.display = 'block';
+        }
+
+        function resetArrow() {
+            isShooting = false;
+            arrowY = 60; 
+            arrow.style.bottom = arrowY + 'px';
+            arrow.style.display = 'none';
+        }
+        
+        // --- VISUAL EFFECTS ---
+        function createExplosion(x, y, color) {
+            const particleCount = 12;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.backgroundColor = color;
+                
+                const angle = (Math.PI * 2 * i) / particleCount;
+                const velocity = 30 + Math.random() * 20;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                particle.style.animation = 'explode 0.6s ease-out forwards';
+                
+                gameScreen.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 600);
+            }
+        }
+        
+        function createArrowTrail() {
+            if (Math.random() < 0.3) {
+                const trail = document.createElement('div');
+                trail.className = 'arrow-trail';
+                trail.style.left = arrow.style.left;
+                trail.style.bottom = arrow.style.bottom;
+                gameScreen.appendChild(trail);
+                setTimeout(() => trail.remove(), 300);
+            }
+        }
+        
+        function updateComboDisplay() {
+            if (combo >= 3) {
+                comboDisplay.style.display = 'block';
+                comboVal.innerText = combo;
+                comboDisplay.style.animation = 'none';
+                setTimeout(() => comboDisplay.style.animation = 'pulse 0.5s ease', 10);
+            } else {
+                comboDisplay.style.display = 'none';
+            }
+        }
+        
+        function createClouds() {
+            for (let i = 0; i < 3; i++) {
+                const cloud = document.createElement('div');
+                cloud.className = 'cloud';
+                const size = 60 + Math.random() * 40;
+                cloud.style.width = size + 'px';
+                cloud.style.height = size * 0.6 + 'px';
+                cloud.style.top = (20 + Math.random() * 150) + 'px';
+                cloud.style.left = (Math.random() * 400) + 'px';
+                cloud.style.animationDuration = (15 + Math.random() * 10) + 's';
+                gameScreen.appendChild(cloud);
+            }
+        }
+
+        // --- CONTROLS ---
+        document.addEventListener('keydown', (e) => {
+            if (e.code === "Space") {
+                e.preventDefault();
+                shoot();
+            }
+            keys[e.key] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        document.addEventListener('touchstart', (e) => {
+             if(gameScreen.classList.contains('active')) shoot();
+        });
+        document.addEventListener('click', (e) => {
+             if(gameScreen.classList.contains('active') && e.target.id === "game-board") shoot();
+        });
+
+    </script>
+</body>
+</html>

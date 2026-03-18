@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Anti-Spam Filtering Techniques Using Machine Learning</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/theme/white.css" />
+
+    <style>
+      body {
+        font-family: 'Times New Roman', Times, serif;
+        /* Updated gradient to fit a tech/software theme */
+        background: linear-gradient(-45deg, #e3f2fd, #f3e5f5, #e8eaf6);
+        background-sizgige: 400% 400%;
+        animation: bgmove 12s ease infinite;
+      }
+
+      @keyframes bgmove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      .reveal h1 { font-family: 'Times New Roman', Times, serif; font-size: 50px; color: #1565c0; font-weight: 700; }
+      .reveal h1 .title-line1 { display: block; font-size: 40px; }
+      .reveal h1 .title-line2 { display: block; font-size: 0.9em; margin-top: 8px; }
+      .reveal h2 { font-family: 'Times New Roman', Times, serif; color: #283593; font-size: 40px; font-weight: 600; }
+      .reveal h3 { font-family: 'Times New Roman', Times, serif; color: #4527a0; font-size: 32px; font-weight: 600; }
+      .reveal p { font-size: 26px; line-height: 1.4; }
+      .reveal ul { font-size: 24px; line-height: 1.6; }
+      
+      .subtitle { font-size: 22px; color: #555; margin-bottom: 20px;}
+      .highlight { color: #d32f2f; font-weight: bold; }
+
+      /* FLOWCHART STYLES */
+      .flowchart {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 40px;
+      }
+
+      .block {
+        padding: 14px 24px;
+        background: #1976d2;
+        color: white;
+        border-radius: 10px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-decoration: none;
+      }
+
+      .block:hover {
+        transform: scale(1.08);
+        background: #0d47a1;
+      }
+      
+      a { text-decoration: none !important; }
+
+      .arrow {
+        font-size: 28px;
+        font-weight: bold;
+        color: #444;
+      }
+      .logo {
+        width: 120px;
+        float: right;
+        margin-left: 18px;
+        margin-top: -10px;
+      }
+      /* Global slide background image applied to Reveal's background layer */
+      .reveal .backgrounds {
+        background-image: url('BG.png');
+        background-size: cover;
+        background-position: center right;
+        background-repeat: no-repeat;
+      }
+      /* Ensure slides are transparent so the background shows through */
+      .reveal .slides section {
+        background: transparent !important;
+      }
+      .code-image {
+        max-width: 88%;
+        display: block;
+        margin: 18px auto;
+        border: 1px solid rgba(0,0,0,0.08);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      }
+      .center-slide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        min-height: calc(100vh - 120px);
+      }
+      .center-slide .code-image {
+        max-width: 80%;
+        margin: 12px auto 0 auto;
+      }
+      .center-slide h2 { margin: 0 0 12px 0; }
+    </style>
+  </head>
+
+  <body>
+    <button id="export-pdf" class="export-btn" title="Export slides to PDF">Export PDF</button>
+    <div class="reveal">
+      <div class="slides">
+        
+        <section>
+          <img src="logo.png" alt="College logo" class="logo">
+          <p></p>
+          <p class="subtitle"><strong>Meenakshi Sundararajan Engineering College</strong></p>
+          
+          <h1>
+            <span class="title-line1">Anti-Spam Filtering Techniques</span>
+            <span class="title-line2">Using Machine Learning</span>
+          </h1>
+          
+          <div class="fragment fade-in" style="margin-top: 40px;">
+            <p style="font-size: 25px; margin: 5px 0;"><strong>Team Members:</strong></p>
+            <p style="font-size: 20px; margin: 0;">Pradeep Kumar P<br/>Mohamed Rasheed Irfan R<br/>Sarvesh R</p>
+          </div>
+
+          <div class="fragment fade-in" style="margin-top: 20px;">
+            <p style="font-size: 25px; margin: 5px 0;"><strong>Professor:</strong></p>
+            <p style="font-size: 20px; margin: 0;">Mrs. Yamuna S</p>
+          </div>
+        </section>
+
+        <section>
+          <h2>Index</h2>
+          <ul>
+            <li class="fragment fade-up">Problem Statement</li>
+            <li class="fragment fade-up">Abstract</li>
+            <li class="fragment fade-up">Methodology Pipeline</li>
+            <li class="fragment fade-up">Modules & Python Execution</li>
+            <li class="fragment fade-up">Conclusion</li>
+            <li class="fragment fade-up">References</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>1. Problem Statement</h2>
+          <p></p>
+          <ul>
+            <li class="fragment fade-up"><strong>The Scale of Spam:</strong> Spam accounts for upwards of 90% of all e-mail today.</li>
+            <li class="fragment fade-up"><strong>The Core Challenge:</strong> Differentiating spam from a legitimate message based on text content.</li>
+            <li class="fragment fade-up"><strong>Data Imbalance:</strong> The large proportion of spam makes it highly likely that legitimate messages get misclassified.</li>
+            <li class="fragment fade-up"><span class="highlight">The Critical Error:</span> The cost of False Positives (blocking real emails) is much higher than False Negatives (letting spam through).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>2. Abstract</h2>
+          <ul>
+            <li class="fragment fade-up"><strong>The Challenge:</strong> Creating a flawless filter that eradicates spam without discarding legitimate emails.</li>
+            <li class="fragment fade-up"><strong>The Solution:</strong> Leveraging Naïve Bayesian machine learning—a dynamic, content-driven, and self-learning statistical model.</li>
+            <li class="fragment fade-up"><strong>Our Experiment:</strong> Evaluated four standard Bayesian filtering techniques on a massive dataset and engineered a novel "derivative filter" based on token percentages.</li>
+            <li class="fragment fade-up"><strong>The Verdict:</strong> Through cost-sensitive evaluation, we proved these optimized techniques act as a highly effective first line of defense.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>3. Methodology Pipeline</h2>
+          
+          <div class="flowchart">
+            <a href="#/4/0">
+              <div class="block fragment fade-up">Data Preprocessing</div>
+            </a>
+            <div class="arrow fragment fade-in">→</div>
+
+            <a href="#/4/1">
+              <div class="block fragment fade-up">Model Training</div>
+            </a>
+            <div class="arrow fragment fade-in">→</div>
+
+            <a href="#/4/2">
+              <div class="block fragment fade-up">Classification</div>
+            </a>
+            <div class="arrow fragment fade-in">→</div>
+
+            <a href="#/4/3">
+              <div class="block fragment fade-up">Cost Evaluation</div>
+            </a>
+          </div>
+        </section>
+
+        <section>
+          <section>
+            <h3>Module 1: Preprocessing & Tokenization</h3>
+            <ul>
+              <li><strong>Description:</strong> The message is parsed for tokens using blank spaces as separators.</li>
+              <li><strong>Python Execution:</strong> 
+                <ul>
+                  <li>Uses Python string methods (<code>split()</code>, <code>lower()</code>) to parse text.</li>
+                  <li>Uses Python <code>set()</code> so the same token is not counted more than once, avoiding statistical bias.</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Module 2: Training Phase (Self-Learning)</h3>
+            <ul>
+              <li><strong>Description:</strong> The filter is trained using a known corpus. Two tables ("good" and "bad") track token occurrences.</li>
+              <li><strong>Python Execution:</strong>
+                <ul>
+                  <li>Uses Python <code>Dictionary</code> data structures to map tokens to their frequency counts.</li>
+                  <li>Iterates through datasets to populate spam and ham probability models.</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Module 3: Classification Phase</h3>
+            <p></p>
+            <ul>
+              <li><strong>Description:</strong> Uses Bayes' theorem to calculate probabilities and classify incoming unseen emails.</li>
+              <li><strong>Python Execution:</strong>
+                <ul>
+                  <li>Assigns a default probability of <code>0.4</code> to unseen tokens.</li>
+                  <li>Uses <code>list.sort()</code> to rank tokens by their deviation from 0.5 (neutral) to implement the "Fixed Number of Tokens" technique.</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Module 4: Cost-Sensitive Evaluation</h3>
+            <ul>
+              <li><strong>Description:</strong> Operates on the principle that false positives are heavily penalized compared to false negatives.</li>
+              <li><strong>Python Execution:</strong>
+                <ul>
+                  <li>Calculates the Total Cost Ratio (TCR).</li>
+                  <li>Uses strict <code>if/else</code> conditionals against a high threshold (e.g., <code>t = 0.9</code>) to ensure maximum safety for legitimate mail.</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+        </section>
+
+        <section class="center-slide">
+          <h2>SAMPLE CODE</h2>
+          <img src="sample-code.png" alt="Sample code screenshot" class="code-image">
+        </section>
+
+        <section>
+          <h2>SAMPLE OUTPUT</h2>
+          <img src="output.png" alt="Sample output screenshot" class="code-image">
+        </section>
+
+        <section>
+          <h2>5. Conclusion</h2>
+          <ul>
+            <li class="fragment fade-up"><strong>Best Technique:</strong> The "Fixed Token" approach was the most effective among the four evaluated techniques.</li>
+            <li class="fragment fade-up"><strong>Optimal Configuration:</strong> Peak performance is achieved when using between 5 to 12 effective tokens.</li>
+            <li class="fragment fade-up"><strong>Practical Application:</strong> Highly effective as a first-pass filter when integrated with blacklist and rule-based methods.</li>
+            <li class="fragment fade-up"><strong>Future Scope:</strong> Implementation of lemmatizers and stoplists to further increase precision.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>6. References</h2>
+          <ul style="font-size: 18px; line-height: 1.5;">
+            <li>Deshpande, V. P., Erbacher, R. F., & Harris, C., "An Evaluation of Naïve Bayesian Anti-Spam Filtering Techniques," <em>Proc. 2007 IEEE Workshop on Information Assurance</em>, West Point, NY, 2007.</li>
+            <li>Sahami, M., Dumais, S., Heckerman, D., & Horvitz, E., "A Bayesian approach to filtering junk email," <em>AAAI Workshop on Learning for Text Categorization</em>, 1998.</li>
+            <li>Graham, P., "A Plan for Spam," August 2002.</li>
+            <li>Sahami, M., "Learning limited dependence Bayesian classifiers," <em>Proc. Second Int. Conference on Knowledge Discovery and Data Mining</em>, 1996.</li>
+            <li>Provost, J., "Naive Bayes vs. Rule Learning in Classification of Email," <em>Artificial Intelligence Lab, Univ. of Texas</em>.</li>
+            <li>Rennie, J., "ifile: An application of machine learning to e-mail filtering," <em>KDD-2000 Text Mining Workshop</em>.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h1>Thank You</h1>
+          <p>Open for Questions</p>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.4.0/plugin/print-pdf/print-pdf.js"></script>
+    <script>
+      Reveal.initialize({
+        hash: true,
+        slideNumber: true,
+        controls: true,
+        progress: true,
+        transition: "slide",
+        transitionSpeed: "fast",
+        backgroundTransition: "fade"
+      });
+    </script>
+
+    <script>
+      (function(){
+        // Create export button behavior: open printable view and trigger print
+        const btn = document.getElementById('export-pdf');
+        if(!btn) return;
+        btn.addEventListener('click', function(){
+          // Build a URL that tells Reveal to render the print/pdf layout
+          const base = location.href.split('#')[0].split('?')[0];
+          const printUrl = base + '?print-pdf';
+          const w = window.open(printUrl, '_blank');
+          // Try to auto-print once the new window has loaded (may be blocked by popup blockers)
+          if (w) {
+            w.addEventListener ? w.addEventListener('load', () => setTimeout(() => w.print(), 700)) : null;
+          } else {
+            // Popup blocked — open in same tab instead
+            window.location.href = printUrl;
+          }
+        });
+      })();
+    </script>
+
+    <style>
+      .export-btn {
+        position: fixed;
+        right: 18px;
+        top: 18px;
+        z-index: 9999;
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        font-weight: 600;
+      }
+      .export-btn:hover { background: #0d47a1; }
+      @media print { .export-btn { display: none !important; } }
+    </style>
+  </body>
+</html>
